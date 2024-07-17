@@ -1,22 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat UI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>Chat with AI</h1>
-  <form id="chat-form">
-    <input type="text" id="message" placeholder="Enter your message" required>
-    <button type="submit">Send</button>
-  </form>
-  <div id="response"></div>
+<body class="bg-gray-100 h-full flex items-center justify-center">
+  <div class="bg-white p-8 rounded-lg shadow-md w-[1200px] h-full flex flex-col">
+    <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Chat with AI</h1>
+    <div id="chat-messages" class="flex-grow mb-4 overflow-y-auto">
+      <!-- Chat messages will be appended here -->
+    </div>
+    <form id="chat-form" class="flex">
+      <input type="text" id="message" placeholder="Enter your message" required
+             class="flex-grow px-4 py-2 text-gray-700 bg-gray-200 rounded-l-lg focus:outline-none focus:bg-white">
+      <button type="submit"
+              class="px-4 py-2 text-white bg-blue-500 rounded-r-lg hover:bg-blue-600 focus:outline-none focus:shadow-outline">
+        Send
+      </button>
+    </form>
+  </div>
 
   <script>
+    const chatMessages = document.getElementById('chat-messages');
+    
     document.getElementById('chat-form').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const message = document.getElementById('message').value;
+      const messageInput = document.getElementById('message');
+      const message = messageInput.value;
+
+      // Append user message
+      appendMessage('You', message);
 
       const response = await fetch('/chat', {
         method: 'POST',
@@ -27,8 +42,25 @@
       });
 
       const data = await response.json();
-      document.getElementById('response').innerText = data.response;
+      
+      // Append AI response
+      appendMessage('AI', data.response);
+
+      // Clear input
+      messageInput.value = '';
     });
+
+    function appendMessage(sender, text) {
+      const messageElement = document.createElement('div');
+      messageElement.className = `mb-2 ${sender === 'You' ? 'text-right' : 'text-left'}`;
+      messageElement.innerHTML = `
+        <span class="inline-block px-2 py-1 rounded-lg ${sender === 'You' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}">
+          <strong>${sender}:</strong> ${text}
+        </span>
+      `;
+      chatMessages.appendChild(messageElement);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
   </script>
 </body>
 </html>
