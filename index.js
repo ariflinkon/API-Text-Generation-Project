@@ -17,4 +17,4 @@ rl.question('Please enter your message: ', async (userInput) => {
     process.stdout.write(chunk.choices[0]?.delta?.content || "");
   }
   rl.close();
-});
+}); 

@@ -9,11 +9,11 @@ const port = 3000;
 const inference = new HfInference("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");
 
 app.use(bodyParser.json());
-app.use(express.static('public'));
+/* app.use(express.static('public')); */
 
 // Serve the HTML file for the root URL
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, /* 'public',  */'index.html'));
 });
 
 app.post('/chat', async (req, res) => {
