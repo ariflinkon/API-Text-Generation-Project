@@ -34,7 +34,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('/chat', async (req, res) => {
+app.post('src/chat', async (req, res) => {
   const userInput = req.body.message;
   let responseText = '';
 
