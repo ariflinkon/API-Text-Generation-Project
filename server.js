@@ -4,6 +4,7 @@ const { MongoClient } = require('mongodb');
 /* const MongoClient = require('mongodb').MongoClient; */
 const { HfInference } = require("@huggingface/inference");
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
 const port = 3000;
@@ -11,8 +12,8 @@ const port = 3000;
 const inference = new HfInference("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");
 
 // MongoDB connection URL and database name
-const mongoUrl = 'mongodb+srv://ariflinkon:GVrC7PlBzYrtxzn8@cluster0.ptir0ud.mongodb.net/';
-const dbName = 'textgenerationdb';
+const mongoUrl = process.env.MONGO_URL;
+const dbName = process.env.DB_NAME;
 
 let db;
 
