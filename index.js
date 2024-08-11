@@ -6,7 +6,7 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
   const message = messageInput.value;
 
   // Append user message
-  appendMessage('You', message);
+  appendMessage('user', message);
 
   const response = await fetch('/chat', {
     method: 'POST',
@@ -19,7 +19,7 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
   const data = await response.json();
   
   // Append AI response
-  appendMessage('AI', data.response);
+  appendMessage('ai', data.response);
 
   // Clear input
   messageInput.value = '';
@@ -27,12 +27,8 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
 
 function appendMessage(sender, text) {
   const messageElement = document.createElement('div');
-  messageElement.className = `mb-2 ${sender === 'You' ? 'text-right' : 'text-left'}`;
-  messageElement.innerHTML = `
-    <span class="inline-block px-2 py-1 rounded-lg ${sender === 'You' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}">
-      <strong>${sender}:</strong> ${text}
-    </span>
-  `;
+  messageElement.className = `message ${sender}`;
+  messageElement.innerHTML = `<p><strong>${sender === 'user' ? 'You' : 'AI'}:</strong> ${text.replace(/\n/g, '<br>')}</p>`;
   chatMessages.appendChild(messageElement);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
