@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Llama Ai</title>
+  <title>Llama AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gray-100 h-full flex items-center justify-center">
   <div class="bg-white p-8 rounded-lg shadow-md w-[1200px] h-full flex flex-col">
@@ -13,7 +14,9 @@
     <div id="chat-messages" class="flex-grow mb-4 overflow-y-auto">
       <!-- Chat messages will be appended here -->
     </div>
-    <form id="chat-form" class="flex">
+    <!-- Loader -->
+    <div id="loader" class="loader" style="display: none;"></div>
+    <form id="chat-form" class="flex mt-4">
       <input type="text" id="message" placeholder="Enter your message" required
              class="flex-grow px-4 py-2 text-gray-700 bg-gray-200 rounded-l-lg focus:outline-none focus:bg-white">
       <button type="submit"
@@ -22,7 +25,6 @@
       </button>
     </form>
   </div>
-  <script src="index.js"> </script>
-<!--   <script src="script.js"></script> -->
+  <script src="index.js"></script>
 </body>
 </html>
