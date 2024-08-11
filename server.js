@@ -1,7 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const { MongoClient } = require('mongodb');
-/* const MongoClient = require('mongodb').MongoClient; */
 const { HfInference } = require("@huggingface/inference");
 const path = require('path');
 require('dotenv').config();
@@ -9,7 +8,7 @@ require('dotenv').config();
 const app = express();
 const port = 3000;
 
-const inference = new HfInference("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");
+const inference = new HfInference(process.env.HF_API_KEY);
 
 // MongoDB connection URL and database name
 const mongoUrl = process.env.MONGO_URL;
@@ -18,23 +17,28 @@ const dbName = process.env.DB_NAME;
 let db;
 
 // Connect to MongoDB
-MongoClient.connect(mongoUrl, { useUnifiedTopology: true })
+MongoClient.connect(mongoUrl, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then((client) => {
     console.log('Connected to MongoDB');
     db = client.db(dbName);
   })
   .catch((error) => {
     console.error('Failed to connect to MongoDB', error);
+    process.exit(1); // Exit if the database connection fails
   });
 
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname)));
 
 // Serve the HTML file for the root URL
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('src/chat', async (req, res) => {
+app.post('/chat', async (req, res) => {
   const userInput = req.body.message;
   let responseText = '';
 
@@ -59,5 +63,5 @@ app.post('src/chat', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server is running`);
+  console.log(`Server is running on port ${port}`);
 });

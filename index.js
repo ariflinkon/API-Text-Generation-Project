@@ -1,20 +1,38 @@
-const { HfInference } = require("@huggingface/inference");
-const readline = require('readline');
+const chatMessages = document.getElementById('chat-messages');
 
-const inference = new HfInference("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");
+document.getElementById('chat-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const messageInput = document.getElementById('message');
+  const message = messageInput.value;
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
+  // Append user message
+  appendMessage('You', message);
+
+  const response = await fetch('/chat', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ message })
+  });
+
+  const data = await response.json();
+  
+  // Append AI response
+  appendMessage('AI', data.response);
+
+  // Clear input
+  messageInput.value = '';
 });
 
-rl.question('Please enter your message: ', async (userInput) => {
-  for await (const chunk of inference.chatCompletionStream({
-    model: "meta-llama/Meta-Llama-3-8B-Instruct",
-    messages: [{ role: "user", content: userInput }],
-    max_tokens: 8000,
-  })) {
-    process.stdout.write(chunk.choices[0]?.delta?.content || "");
-  }
-  rl.close();
-}); 
+function appendMessage(sender, text) {
+  const messageElement = document.createElement('div');
+  messageElement.className = `mb-2 ${sender === 'You' ? 'text-right' : 'text-left'}`;
+  messageElement.innerHTML = `
+    <span class="inline-block px-2 py-1 rounded-lg ${sender === 'You' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700'}">
+      <strong>${sender}:</strong> ${text}
+    </span>
+  `;
+  chatMessages.appendChild(messageElement);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
