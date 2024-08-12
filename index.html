@@ -3,19 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Llama AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
-<body class="bg-gray-100 h-full flex items-center justify-center">
-  <div class="bg-white p-8 rounded-lg shadow-md w-[1200px] h-full flex flex-col">
+<body class="bg-gray-100 h-full flex">
+  <!-- Sidebar for chat history -->
+  <div class="sidebar">
+    <h2>Chat History</h2>
+    <button id="new-chat" class="bg-blue-500 text-white px-4 py-2 rounded mt-4 w-full">New Chat</button>
+    <ul id="chat-history" class="chat-history"></ul>
+    <button id="delete-all" class="bg-red-500 text-white px-4 py-2 rounded mt-4 w-full" >Delete All</button>
+  </div>
+
+  <!-- Main chat content -->
+  <div class="main-content bg-white p-8 rounded-lg shadow-md w-full flex flex-col relative">
+  <div class="main-content bg-white p-8 rounded-lg shadow-md w-full flex flex-col">
     <h1 class="text-2xl font-bold mb-6 text-center text-gray-800">Chat with AI</h1>
-    <div id="chat-messages" class="flex-grow mb-4 overflow-y-auto">
-      <!-- Chat messages will be appended here -->
-    </div>
-    <!-- Loader -->
-    <div id="loader" class="loader" style="display: none;"></div>
+    <div id="chat-messages" class="flex-grow mb-4 overflow-y-auto"></div>
     <form id="chat-form" class="flex mt-4">
       <input type="text" id="message" placeholder="Enter your message" required
              class="flex-grow px-4 py-2 text-gray-700 bg-gray-200 rounded-l-lg focus:outline-none focus:bg-white">
@@ -25,6 +31,9 @@
       </button>
     </form>
   </div>
+  <div id="loader" class="loader absolute top-1/2 left-1/2"></div>
+</div>
+
   <script src="index.js"></script>
 </body>
 </html>

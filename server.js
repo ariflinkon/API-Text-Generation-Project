@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const { HfInference } = require("@huggingface/inference");
 const path = require('path');
 require('dotenv').config();
@@ -33,33 +33,95 @@ MongoClient.connect(mongoUrl, {
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname)));
 
-// Serve the HTML file for the root URL
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+// Fetch all chats
+app.get('/chats', async (req, res) => {
+  try {
+    const chats = await db.collection('chats').find({}).toArray();
+    res.json({ chats });
+  } catch (error) {
+    console.error('Error fetching chats:', error);
+    res.status(500).json({ error: 'Failed to fetch chats' });
+  }
 });
 
-app.post('/chat', async (req, res) => {
-  const userInput = req.body.message;
-  let responseText = '';
+// Fetch a specific chat by ID
+app.get('/chats/:id', async (req, res) => {
+  const chatId = req.params.id;
 
-  for await (const chunk of inference.chatCompletionStream({
-    model: "meta-llama/Meta-Llama-3-8B-Instruct",
-    messages: [{ role: "user", content: userInput }],
-    max_tokens: 8000,
-  })) {
-    responseText += chunk.choices[0]?.delta?.content || "";
+  try {
+    const chat = await db.collection('chats').findOne({ _id: new ObjectId(chatId) });
+
+    if (!chat) {
+      return res.status(404).json({ error: 'Chat not found' });
+    }
+
+    res.json({ messages: chat.messages });
+  } catch (error) {
+    console.error('Error fetching chat:', error);
+    res.status(500).json({ error: 'Failed to fetch chat' });
   }
+});
 
-  // Store user message and AI response in MongoDB
-  const chatCollection = db.collection('chats');
-  await chatCollection.insertOne({
-    user: 'You',
-    message: userInput,
-    response: responseText,
-    timestamp: new Date(),
-  });
+// Delete a specific chat by ID
+app.delete('/chats/:id', async (req, res) => {
+  const chatId = req.params.id;
 
-  res.json({ response: responseText });
+  try {
+    const result = await db.collection('chats').deleteOne({ _id: new ObjectId(chatId) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Chat not found' });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting chat:', error);
+    res.status(500).json({ error: 'Failed to delete chat' });
+  }
+});
+
+// Handle chat messages and AI responses
+app.post('/chat', async (req, res) => {
+  const { message, chatId } = req.body;
+  let responseText = '';
+  let newChatId = chatId;
+
+  try {
+    for await (const chunk of inference.chatCompletionStream({
+      model: "meta-llama/Meta-Llama-3-8B-Instruct",
+      messages: [{ role: "user", content: message }],
+      max_tokens: 8000,
+    })) {
+      responseText += chunk.choices[0]?.delta?.content || "";
+    }
+
+    let chat;
+
+    if (chatId) {
+      // Update existing chat
+      chat = await db.collection('chats').findOneAndUpdate(
+        { _id: new ObjectId(chatId) },
+        { $push: { messages: { sender: 'You', text: message }, messages: { sender: 'AI', text: responseText } } },
+        { returnDocument: 'after' }
+      );
+    } else {
+      // Create new chat
+      chat = await db.collection('chats').insertOne({
+        messages: [
+          { sender: 'You', text: message },
+          { sender: 'LIN-AI', text: responseText }
+        ],
+        timestamp: new Date(),
+      });
+
+      newChatId = chat.insertedId;
+    }
+
+    res.json({ response: responseText, chatId: newChatId });
+  } catch (error) {
+    console.error('Error during AI inference:', error);
+    res.status(500).json({ response: 'An error occurred while processing your request.' });
+  }
 });
 
 app.listen(port, () => {
