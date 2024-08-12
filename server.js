@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const { MongoClient, ObjectId } = require('mongodb');
 const { HfInference } = require("@huggingface/inference");
 const path = require('path');
-require('dotenv').config();
+require('dotenv').config();                                                   
 
 const app = express();
 const port = 3000;
@@ -32,7 +32,7 @@ MongoClient.connect(mongoUrl, {
   });
 
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public'))); // Adjust the path to serve static files
+app.use(express.static(path.join(__dirname,))); // Adjust the path to serve static files
 
 // Middleware to check if the database is initialized
 app.use((req, res, next) => {
