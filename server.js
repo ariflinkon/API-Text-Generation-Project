@@ -18,8 +18,9 @@ let db;
 
 // Connect to MongoDB
 MongoClient.connect(mongoUrl, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+  tls: true, // Ensure TLS/SSL is enabled
+  tlsInsecure: false, // Do not allow insecure connections
+  // tlsAllowInvalidCertificates: true, // Uncomment this if you want to allow invalid certificates
 })
   .then((client) => {
     console.log('Connected to MongoDB');
@@ -31,7 +32,15 @@ MongoClient.connect(mongoUrl, {
   });
 
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname, 'public'))); // Adjust the path to serve static files
+
+// Middleware to check if the database is initialized
+app.use((req, res, next) => {
+  if (!db) {
+    return res.status(500).json({ error: 'Database not initialized' });
+  }
+  next();
+});
 
 // Fetch all chats
 app.get('/chats', async (req, res) => {
@@ -101,12 +110,22 @@ app.post('/chat', async (req, res) => {
       // Update existing chat
       chat = await db.collection('chats').findOneAndUpdate(
         { _id: new ObjectId(chatId) },
-        { $push: { messages: { sender: 'You', text: message }, messages: { sender: 'AI', text: responseText } } },
+        {
+          $push: {
+            messages: {
+              $each: [
+                { sender: 'You', text: message },
+                { sender: 'AI', text: responseText }
+              ]
+            }
+          }
+        },
         { returnDocument: 'after' }
       );
+      chat = chat.value; // Extract the updated chat
     } else {
       // Create new chat
-      chat = await db.collection('chats').insertOne({
+      const result = await db.collection('chats').insertOne({
         messages: [
           { sender: 'You', text: message },
           { sender: 'LIN-AI', text: responseText }
@@ -114,10 +133,11 @@ app.post('/chat', async (req, res) => {
         timestamp: new Date(),
       });
 
-      newChatId = chat.insertedId;
+      newChatId = result.insertedId;
+      chat = await db.collection('chats').findOne({ _id: newChatId });
     }
 
-    res.json({ response: responseText, chatId: newChatId });
+    res.json({ response: responseText, chatId: newChatId, chat });
   } catch (error) {
     console.error('Error during AI inference:', error);
     res.status(500).json({ response: 'An error occurred while processing your request.' });
