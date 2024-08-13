@@ -1,20 +1,20 @@
-
-
-   /* Chat message styling */
-   .message {
-    margin-bottom: 1rem;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    max-width: 75%;
-    word-wrap: break-word;
-  }
+/* Chat message styling */
+.message {
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+/*   border: 1px solid #dee2e6;
+  border-radius: 0.5rem; */
+  word-wrap: break-word;
+}
   .message.user {
-  /*   background-color: #e7e7e7; */
-    text-align: right;
     margin-left: auto;
+    padding-left: 100px;
+    padding-right: 100px;
   }
   .message.ai {
     background-color: #ffffff;
+    padding-left: 100px;
+    padding-right: 100px;
   }
   .message p {
     margin: 0;
