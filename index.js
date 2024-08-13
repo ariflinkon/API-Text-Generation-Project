@@ -104,18 +104,26 @@ document.getElementById('confirm-delete').addEventListener('click', async () => 
         method: 'DELETE'
       });
     }
-
     await loadChatHistory(); // Reload chat history to reflect the deletion
-    alert('All chats have been deleted.');
+    const successMessage = document.createElement('div');
+    successMessage.className = 'bg-green-500 text-white p-4 rounded mb-4 fixed top-0 left-1/2 transform -translate-x-1/2';
+    successMessage.innerText = 'All chats have been deleted.';
+    document.body.appendChild(successMessage);
+    setTimeout(() => successMessage.remove(), 3000);
   } catch (error) {
     console.error('Error:', error);
-    alert('Sorry, there was an error deleting all chats.');
+    const errorMessage = document.createElement('div');
+    errorMessage.className = 'bg-red-500 text-white p-4 rounded mb-4 fixed top-0 left-1/2 transform -translate-x-1/2';
+    errorMessage.innerText = 'Sorry, there was an error deleting all chats.';
+    document.body.appendChild(errorMessage);
+    setTimeout(() => errorMessage.remove(), 3000);
   } finally {
     // Hide loader after processing is complete
     document.getElementById('loader').style.display = 'none';
     modal.style.display = 'none';
     overlay.style.display = 'none';
   }
+
 });
 
 document.getElementById('cancel-delete').addEventListener('click', () => {
@@ -177,6 +185,14 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
 function appendMessage(sender, text) {
   const messageElement = document.createElement('div');
   messageElement.className = `message ${sender}`;
+
+  if (sender === 'user') {
+    const textLength = text.length;
+    messageElement.style.backgroundColor = '#e7e7e7'; // Default background color
+    messageElement.style.minWidth = '100px'; // Set a minimum width to avoid text breaking for short messages
+    messageElement.style.width = `${textLength * 8}px`; // Adjust width based on text length
+  }
+
   messageElement.innerHTML = `<p><strong>${sender === 'user' ? 'You' : 'LIN-AI'}:</strong> ${text.replace(/\n/g, '<br>')}</p>`;
   chatMessages.appendChild(messageElement);
   chatMessages.scrollTop = chatMessages.scrollHeight;

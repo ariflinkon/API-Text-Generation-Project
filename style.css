@@ -9,12 +9,12 @@
     word-wrap: break-word;
   }
   .message.user {
-    background-color: #d1e7dd;
+  /*   background-color: #e7e7e7; */
     text-align: right;
     margin-left: auto;
   }
   .message.ai {
-    background-color: #f1f1f1;
+    background-color: #ffffff;
   }
   .message p {
     margin: 0;
