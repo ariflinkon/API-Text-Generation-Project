@@ -12,7 +12,7 @@ window.onload = async () => {
 
 // Load chat history
 async function loadChatHistory() {
-  const response = await fetch('/chats');
+  const response = await fetch('/chats'); 
   const data = await response.json();
 
   chatHistory.innerHTML = '';
@@ -49,35 +49,79 @@ async function deleteChat(chatId) {
 }
 
 // Delete all chats
-document.getElementById('delete-all').addEventListener('click', async () => {
-  if (confirm('Are you sure you want to delete all chats?')) {
-    try {
-      // Show loader when sending the request
-      document.getElementById('loader').style.display = 'block';
+// Create a modal for delete confirmation
+const modal = document.createElement('div');
+modal.id = 'delete-modal';
+modal.style.display = 'none';
+modal.style.position = 'fixed';
+modal.style.top = '50%';
+modal.style.left = '50%';
+modal.style.transform = 'translate(-50%, -50%)';
+modal.style.backgroundColor = 'white';
+modal.style.padding = '20px';
+modal.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
+modal.style.zIndex = '1000';
+modal.className = 'bg-white p-6 rounded-lg shadow-lg';
+modal.innerHTML = `
+  <p class="mb-4">Are you sure you want to delete all chats?</p>
+  <div class="flex justify-end">
+    <button id="confirm-delete" class="mr-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700">Delete</button>
+    <button id="cancel-delete" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-700">Cancel</button>
+  </div>
+`;
+document.body.appendChild(modal);
 
-      // Get chat history
-      const response = await fetch('/chats');
-      const data = await response.json();
+// Create an overlay for the modal
+const overlay = document.createElement('div');
+overlay.id = 'overlay';
+overlay.style.display = 'none';
+overlay.style.position = 'fixed';
+overlay.style.top = '0';
+overlay.style.left = '0';
+overlay.style.width = '100%';
+overlay.style.height = '100%';
+overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+overlay.style.zIndex = '999';
+document.body.appendChild(overlay);
 
-      // Iterate over each chat and delete the chatId
-      for (const chat of data.chats) {
-        await fetch(`/chats/${chat._id}`, {
-          method: 'DELETE'
-        });
-      }
+document.getElementById('delete-all').addEventListener('click', () => {
+  modal.style.display = 'block';
+  overlay.style.display = 'block';
+});
 
-      await loadChatHistory(); // Reload chat history to reflect the deletion
-      alert('All chats have been deleted.');
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Sorry, there was an error deleting all chats.');
-    } finally {
-      // Hide loader after processing is complete
-      document.getElementById('loader').style.display = 'none';
+document.getElementById('confirm-delete').addEventListener('click', async () => {
+  try {
+    // Show loader when sending the request
+    document.getElementById('loader').style.display = 'block';
+
+    // Get chat history
+    const response = await fetch('/chats');
+    const data = await response.json();
+
+    // Iterate over each chat and delete the chatId
+    for (const chat of data.chats) {
+      await fetch(`/chats/${chat._id}`, {
+        method: 'DELETE'
+      });
     }
+
+    await loadChatHistory(); // Reload chat history to reflect the deletion
+    alert('All chats have been deleted.');
+  } catch (error) {
+    console.error('Error:', error);
+    alert('Sorry, there was an error deleting all chats.');
+  } finally {
+    // Hide loader after processing is complete
+    document.getElementById('loader').style.display = 'none';
+    modal.style.display = 'none';
+    overlay.style.display = 'none';
   }
 });
 
+document.getElementById('cancel-delete').addEventListener('click', () => {
+  modal.style.display = 'none';
+  overlay.style.display = 'none';
+});
 // Start a new chat
 document.getElementById('new-chat').addEventListener('click', () => {
   currentChatId = null;
