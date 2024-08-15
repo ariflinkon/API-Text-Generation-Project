@@ -83,13 +83,13 @@
   .chat-history li {
     padding: 0.5rem;
     margin-bottom: 0.5rem;
-    background-color: #e9ecef;
+    background-color: #ffffff;
     border-radius: 0.25rem;
     cursor: pointer;
   }
 
   .chat-history li:hover {
-    background-color: #ced4da;
+    background-color: #f0f0f0;
   }
 
   .chat-history li button {

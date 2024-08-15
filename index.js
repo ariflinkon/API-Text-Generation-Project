@@ -59,7 +59,7 @@ function appendMessage(sender, text) {
     messageElement.style.margin = '0 auto'; // Center the user message
   }
 
-  messageElement.innerHTML = `<p><strong>${sender === 'user' ? 'You' : 'LIN-AI'}:</strong> ${text.replace(/\n/g, '<br>')}</p>`; // Set the inner HTML of the message element
+ messageElement.innerHTML = `<p><strong><span style="border-radius: 50%; padding: 7px; background-color: #f0f0f0;">${sender === 'user' ? '<i class="fa fa-user"></i>' : '<i class="fa fa-robot"></i>'}</span> </strong> ${text.replace(/\n/g, '<br>')}</p>`;// Set the inner HTML of the message element
   chatMessages.appendChild(messageElement); // Append the message element to the chat messages element
   chatMessages.scrollTop = chatMessages.scrollHeight; // Scroll to the bottom of the chat messages element
 }
@@ -152,6 +152,7 @@ document.getElementById('cancel-delete').addEventListener('click', () => {
 document.getElementById('new-chat').addEventListener('click', () => {
   currentChatId = null; // Reset the current chat ID
   chatMessages.innerHTML = ''; // Clear the chat messages element
+  document.getElementById('chat-title').style.display = 'block'; // Show the "Chat with AI" text
 });
 
 // Event listener for the chat form submission
@@ -168,6 +169,8 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
 
   try {
     document.getElementById('loader').style.display = 'block'; // Show the loader
+    document.getElementById('chat-title').style.pointerEvents = 'none'; // Disable the "Chat with AI" text
+    document.getElementById('chat-title').style.display = 'none'; // Hide the "Chat with AI" text
 
     const response = await fetch('/chat', {
       method: 'POST',
@@ -187,5 +190,6 @@ document.getElementById('chat-form').addEventListener('submit', async (e) => {
     appendMessage('ai', 'Sorry, there was an error processing your request.'); // Append an error message
   } finally {
     document.getElementById('loader').style.display = 'none'; // Hide the loader
+    document.getElementById('chat-title').style.pointerEvents = 'auto'; // Enable the "Chat with AI" text
   }
 });
